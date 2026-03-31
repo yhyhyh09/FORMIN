@@ -4,15 +4,12 @@ DART 공시 수집, 뉴스/sentiment 모니터링, 경영전략 Gap 탐지
 """
 from __future__ import annotations
 from datetime import datetime
-from anthropic import Anthropic
-from config.settings import ANTHROPIC_API_KEY, LLM_MODEL, LLM_MAX_TOKENS
+from utils.llm import chat
 from graph.state import IRState
 from tools.dart_api import search_corp_code, get_recent_filings, get_all_filings
 from tools.sentiment import crawl_naver_finance_news, aggregate_sentiment
 from tools.web_search import search_company_news
 from utils.audit import record_action
-
-client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
 
 def monitoring_agent(state: IRState) -> IRState:
@@ -88,13 +85,8 @@ JSON 배열 형식으로만 응답: ["Gap1", "Gap2", ...]"""
 
     strategy_gaps: list[str] = []
     try:
-        response = client.messages.create(
-            model=LLM_MODEL,
-            max_tokens=1024,
-            messages=[{"role": "user", "content": gap_prompt}],
-        )
         import json, re
-        text = response.content[0].text
+        text = chat(gap_prompt)
         match = re.search(r'\[.*?\]', text, re.DOTALL)
         if match:
             strategy_gaps = json.loads(match.group())

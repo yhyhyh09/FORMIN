@@ -6,12 +6,10 @@ from __future__ import annotations
 import json
 import re
 from datetime import datetime
-from anthropic import Anthropic
-from config.settings import ANTHROPIC_API_KEY, LLM_MODEL, LLM_MAX_TOKENS, MAX_ITERATIONS
+from utils.llm import chat
+from config.settings import MAX_ITERATIONS
 from graph.state import IRState
 from utils.audit import record_action
-
-client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
 NARRATIVE_SYSTEM_PROMPT = """당신은 15년 경력의 한국 상장사 IR/경영전략 전문가입니다.
 투자자와의 효과적인 소통을 위한 IR 나레이티브를 작성합니다.
@@ -81,13 +79,7 @@ def narrative_generator_agent(state: IRState) -> IRState:
 
     narrative_draft = ""
     try:
-        response = client.messages.create(
-            model=LLM_MODEL,
-            max_tokens=LLM_MAX_TOKENS,
-            system=NARRATIVE_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": narrative_prompt}],
-        )
-        narrative_draft = response.content[0].text
+        narrative_draft = chat(narrative_prompt, system=NARRATIVE_SYSTEM_PROMPT)
     except Exception as e:
         narrative_draft = _fallback_narrative(company_name, gaps)
         record_action(state, "narrative_generator_agent", "llm_fallback", {"error": str(e)})
@@ -136,12 +128,7 @@ def _generate_qa(company_name: str, gaps: list[str], narrative: str) -> list[dic
 JSON 배열 형식으로만 응답:
 [{{"question": "...", "answer": "..."}}, ...]"""
     try:
-        response = client.messages.create(
-            model=LLM_MODEL,
-            max_tokens=2048,
-            messages=[{"role": "user", "content": qa_prompt}],
-        )
-        text = response.content[0].text
+        text = chat(qa_prompt)
         match = re.search(r'\[.*\]', text, re.DOTALL)
         if match:
             return json.loads(match.group())

@@ -5,13 +5,10 @@ Personalization & Engagement Agent
 from __future__ import annotations
 import json
 import re
-from anthropic import Anthropic
-from config.settings import ANTHROPIC_API_KEY, LLM_MODEL
+from utils.llm import chat
 from graph.state import IRState
 from tools.investor_data import INVESTOR_STYLE_PREFERENCES
 from utils.audit import record_action
-
-client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
 
 def personalization_agent(state: IRState) -> IRState:
@@ -96,12 +93,7 @@ JSON 형식으로만 응답:
 }}"""
 
     try:
-        response = client.messages.create(
-            model=LLM_MODEL,
-            max_tokens=1024,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = response.content[0].text
+        text = chat(prompt)
         match = re.search(r'\{.*\}', text, re.DOTALL)
         if match:
             content = json.loads(match.group())

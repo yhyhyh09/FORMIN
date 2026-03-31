@@ -4,13 +4,10 @@ Optimization & Compliance Agent
 """
 from __future__ import annotations
 from datetime import datetime
-from anthropic import Anthropic
-from config.settings import ANTHROPIC_API_KEY, LLM_MODEL
+from utils.llm import chat
 from graph.state import IRState
 from tools.compliance import run_full_compliance_check
 from utils.audit import record_action, save_audit_log
-
-client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
 
 def optimization_agent(state: IRState) -> IRState:
@@ -116,12 +113,7 @@ def _suggest_optimizations(narrative: str, flags: list[str]) -> list[str]:
 각 이슈에 대해 1~2문장으로 수정 방향을 제시하세요. 한국어로.
 번호 목록 형식으로만 응답."""
     try:
-        response = client.messages.create(
-            model=LLM_MODEL,
-            max_tokens=512,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = response.content[0].text
+        text = chat(prompt)
         lines = [l.strip() for l in text.split("\n") if l.strip() and l[0].isdigit()]
         return lines
     except Exception:

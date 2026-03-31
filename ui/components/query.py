@@ -4,10 +4,7 @@ IR 담당자가 자연어로 Claude에게 직접 질의
 """
 from __future__ import annotations
 import streamlit as st
-from anthropic import Anthropic
-from config.settings import ANTHROPIC_API_KEY, LLM_MODEL
-
-client = Anthropic(api_key=ANTHROPIC_API_KEY)
+from utils.llm import chat_with_history
 
 
 def render_query_tab(state: dict) -> None:
@@ -99,12 +96,6 @@ def _query_claude(user_input: str, context: str, history: list[dict]) -> str:
     ]
 
     try:
-        response = client.messages.create(
-            model=LLM_MODEL,
-            max_tokens=1024,
-            system=system_prompt,
-            messages=messages,
-        )
-        return response.content[0].text
+        return chat_with_history(messages, system=system_prompt)
     except Exception as e:
-        return f"오류가 발생했습니다: {str(e)}\n\nAnthropic API 키를 확인해 주세요."
+        return f"오류가 발생했습니다: {str(e)}\n\nGemini API 키를 확인해 주세요."

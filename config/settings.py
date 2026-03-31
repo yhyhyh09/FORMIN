@@ -11,7 +11,7 @@ load_dotenv(BASE_DIR / ".env")
 
 # ── API Keys ──────────────────────────────────────────────
 DART_API_KEY: str = os.getenv("DART_API_KEY", "")
-ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
 TAVILY_API_KEY: str = os.getenv("TAVILY_API_KEY", "")
 
 # ── 기본 기업 정보 ────────────────────────────────────────
@@ -25,7 +25,7 @@ CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
 AUDIT_LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── LLM 설정 ─────────────────────────────────────────────
-LLM_MODEL: str = "claude-sonnet-4-6"
+LLM_MODEL: str = "gemini-1.5-flash"   # 무료 tier 지원
 LLM_MAX_TOKENS: int = 4096
 LLM_TEMPERATURE: float = 0.3
 
@@ -51,6 +51,6 @@ def validate_keys() -> dict[str, bool]:
     """API 키 설정 여부 반환"""
     return {
         "DART_API_KEY": bool(DART_API_KEY),
-        "ANTHROPIC_API_KEY": bool(ANTHROPIC_API_KEY),
+        "GEMINI_API_KEY": bool(GEMINI_API_KEY),
         "TAVILY_API_KEY": bool(TAVILY_API_KEY),
     }
